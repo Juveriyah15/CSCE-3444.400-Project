@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UNT Group Finder</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- LOGIN -->
+  <section id="login" class="screen active auth">
+    <div class="auth-card">
+      <div class="logo">UNT</div>
+      <div class="subtitle">GROUP FINDER</div>
+      <div class="field">
+        <label>UNT Email</label>
+        <input id="loginEmail" type="email" placeholder="yourname@my.unt.edu">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="loginPassword" type="password" placeholder="Password">
+      </div>
+      <button class="primary" onclick="login()">LOG IN</button>
+      <p class="small">Don't have an account? <span class="link" onclick="show('register')">REGISTER</span></p>
+    </div>
+  </section>
+
+  <!-- REGISTER -->
+  <section id="register" class="screen auth">
+    <div class="auth-card">
+      <button class="back" onclick="show('login')">← Back to Login</button>
+      <div class="logo">UNT</div>
+      <div class="subtitle">CREATE ACCOUNT</div>
+      <div class="field"><label>Your Name</label><input id="regName" placeholder="Your Name"></div>
+      <div class="field"><label>UNT Email</label><input id="regEmail" type="email" placeholder="yourname@my.unt.edu"></div>
+      <div class="field"><label>Create Password</label><input id="regPass" type="password" placeholder="Create Password"></div>
+      <div class="field"><label>Confirm Password</label><input id="regConfirm" type="password" placeholder="Confirm Password"></div>
+      <button class="primary" onclick="register()">REGISTER</button>
+      <p class="small">Already have an account? <span class="link" onclick="show('login')">LOG IN</span></p>
+    </div>
+  </section>
+
+  <!-- MAIN / SEARCH -->
+  <section id="home" class="screen">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleDrawer()">☰</button>
+      <div class="brand">UNT GROUP FINDER</div>
+      <button class="icon-btn" onclick="show('notifications')" aria-label="Notifications">♧<span class="badge" id="notifBadge">3</span></button>
+    </header>
+    <div style="padding-top:18px">
+      <h1>Find a Group</h1>
+      <div class="search">
+        <input id="searchInput" oninput="renderGroups()" placeholder="Search courses or hobbies...">
+        <button class="primary" style="width:auto;margin:0" onclick="renderGroups()">Search</button>
+      </div>
+      <select id="filter" class="filter" onchange="renderGroups()">
+        <option value="all">Filter by Category</option>
+        <option value="course">Courses</option>
+        <option value="hobby">Hobbies</option>
+      </select>
+      <div id="groupList"></div>
+    </div>
+  </section>
+
+  <!-- GROUPS JOINED -->
+  <section id="groups" class="screen">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleDrawer()">☰</button>
+      <div class="brand">GROUPS JOINED</div>
+      <button class="icon-btn" onclick="show('notifications')">♧</button>
+    </header>
+    <div style="padding-top:18px">
+      <h1>Groups Joined</h1>
+      <div id="joinedList"></div>
+    </div>
+  </section>
+
+  <!-- ACCOUNT -->
+  <section id="profile" class="screen">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleDrawer()">☰</button>
+      <div class="brand">ACCOUNT</div>
+    </header>
+    <div style="padding-top:18px">
+      <div class="profile-card">
+        <div class="avatar">◯</div>
+        <div id="profileName" class="profile-name">Your Name</div>
+        <div id="profileEmail" class="profile-email">yourname@my.unt.edu</div>
+        <div class="profile-line"><b>ABOUT</b><span id="profileAbout">Write a little about yourself.</span></div>
+        <div class="profile-line"><b>INTERESTS</b><span>Computer Science, Study Groups</span></div>
+        <button class="primary" onclick="saveProfile()">EDIT DISPLAY NAME</button>
+      </div>
+
+      <div class="profile-card account-settings">
+        <h2>Account Verification</h2>
+        <p class="helper">Status: <strong id="verificationStatus">Not verified</strong></p>
+        <button class="secondary" onclick="verifyAccount()">VERIFY ACCOUNT</button>
+        <p class="helper">Demo only: this marks the account as verified in this page. It does not send an email.</p>
+      </div>
+
+      <div class="profile-card account-settings">
+        <h2>Update Password</h2>
+        <div class="field"><label for="currentPassword">Current Password</label><input id="currentPassword" type="password" autocomplete="current-password" placeholder="Enter current password"></div>
+        <div class="field"><label for="newPassword">New Password</label><input id="newPassword" type="password" autocomplete="new-password" placeholder="Enter new password"></div>
+        <div class="field"><label for="confirmNewPassword">Confirm New Password</label><input id="confirmNewPassword" type="password" autocomplete="new-password" placeholder="Confirm new password"></div>
+        <button class="primary" onclick="updatePassword()">UPDATE PASSWORD</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- NOTIFICATIONS -->
+  <section id="notifications" class="screen">
+    <header class="topbar">
+      <button class="hamburger" onclick="toggleDrawer()">☰</button>
+      <div class="brand">NOTIFICATIONS</div>
+    </header>
+    <div style="padding-top:18px">
+      <h1>Notifications</h1>
+      <div class="notification"><div class="bell">♧</div><div><p><b>Group Announcement</b><br>CSCE 3444 Study Group has a new announcement.</p><time>2m ago</time></div></div>
+      <div class="notification"><div class="bell">♧</div><div><p><b>Sarah joined</b><br>Sarah joined your Gaming Enthusiasts group.</p><time>15m ago</time></div></div>
+      <div class="notification"><div class="bell">♧</div><div><p><b>Group Announcement</b><br>Math 1720 Study Buddies posted a new message.</p><time>1h ago</time></div></div>
+    </div>
+  </section>
+
+  <!-- DRAWER -->
+  <div id="drawer" class="drawer" onclick="closeDrawer(event)">
+    <div class="drawer-panel" onclick="event.stopPropagation()">
+      <div class="drawer-head">
+        <div class="drawer-title">MENU</div>
+        <button class="hamburger" onclick="toggleDrawer()">×</button>
+      </div>
+      <button class="menu-item" onclick="navigate('groups')"><span>👥</span>Groups Joined</button>
+      <button class="menu-item" onclick="navigate('home')"><span>⌕</span>Find Groups</button>
+      <button class="menu-item" onclick="navigate('profile')"><span>♙</span>Account</button>
+      <button class="menu-item" onclick="logout()"><span>↪</span>Log Out</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script src="script.js" defer></script>
+</body>
+</html>
