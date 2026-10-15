@@ -11,6 +11,11 @@ const groups = [
   {id:5,name:"Photography & Art",members:8,category:"hobby",desc:"Share projects and creative ideas.",joined:false}
 ];
 
+// Returns true only for UNT email addresses (@unt.edu or @my.unt.edu)
+function isUntEmail(email){
+  return /^[^\s@]+@(my\.)?unt\.edu$/i.test(email);
+}
+
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
@@ -31,6 +36,7 @@ function login(){
   const email=document.getElementById('loginEmail').value.trim();
   const pass=document.getElementById('loginPassword').value;
   if(!email || !pass){toast('Please enter your email and password.');return}
+  if(!isUntEmail(email)){toast('Please use your UNT email (@my.unt.edu or @unt.edu).');return}
   // Once an account has a password in this demo session, require the current password.
   if(email.toLowerCase() === currentUserEmail.toLowerCase() && pass !== currentPasswordValue){
     toast('Incorrect password. Please use your current password.');
@@ -47,6 +53,8 @@ function register(){
   const p=document.getElementById('regPass').value;
   const c=document.getElementById('regConfirm').value;
   if(!name||!email||!p||!c){toast('Please complete all fields.');return}
+  if(!isUntEmail(email)){toast('Please use your UNT email (@my.unt.edu or @unt.edu).');return}
+  if(p.length < 8){toast('Password must be at least 8 characters.');return}
   if(p!==c){toast('Passwords do not match.');return}
   document.getElementById('profileName').textContent=name;
   document.getElementById('profileEmail').textContent=email;
