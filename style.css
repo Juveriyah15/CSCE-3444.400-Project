@@ -61,7 +61,6 @@
 
   .screen{display:none;padding:20px 18px 35px}
   .screen.active{display:block}
-  /* Auth screens must stay hidden unless active; .auth also uses display:flex. */
   .screen.auth{display:none}
   .auth{
     min-height:100vh;min-height:100dvh;display:flex;align-items:center;justify-content:center;
