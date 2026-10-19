@@ -47,7 +47,7 @@ function login(){
   const pass=document.getElementById('loginPassword').value;
   if(!email || !pass){toast('Please enter your email and password.');return}
   if(!isUntEmail(email)){toast('Please use your UNT email (@my.unt.edu or @unt.edu).');return}
-  // Once an account has a password in this demo session, require the current password.
+  // If this email already has a password in this session, it must match.
   if(email.toLowerCase() === currentUserEmail.toLowerCase() && pass !== currentPasswordValue){
     toast('Incorrect password. Please use your current password.');
     return;
@@ -199,7 +199,6 @@ function updatePassword(){
   if(next.length < 8){toast('New password must be at least 8 characters.');return}
   if(next !== confirm){toast('New passwords do not match.');return}
   if(next === current){toast('Choose a different new password.');return}
-  // Replace the saved demo password so the old password fails the next login check.
   currentPasswordValue = next;
   document.getElementById('currentPassword').value = '';
   document.getElementById('newPassword').value = '';
