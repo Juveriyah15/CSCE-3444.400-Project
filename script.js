@@ -2,6 +2,14 @@
 let currentPasswordValue = '';
 let currentUserEmail = '';
 let accountVerified = false;
+let profilePhoto = '';
+
+// Notifications start with a few samples; joining/leaving groups adds new ones.
+const notifications = [
+  {title:'Group Announcement', msg:'CSCE 3444 Study Group has a new announcement.', time:'2m ago', unread:true},
+  {title:'Sarah joined', msg:'Sarah joined your Gaming Enthusiasts group.', time:'15m ago', unread:true},
+  {title:'Group Announcement', msg:'Math 1720 Study Buddies posted a new message.', time:'1h ago', unread:true}
+];
 
 const groups = [
   {id:1,name:"CSCE 3444 Study Group",members:5,category:"course",desc:"Study together for CSCE 3444.",joined:true},
@@ -11,7 +19,7 @@ const groups = [
   {id:5,name:"Photography & Art",members:8,category:"hobby",desc:"Share projects and creative ideas.",joined:false}
 ];
 
-// Returns true only for UNT email addresses (@unt.edu or @my.unt.edu)
+// Returns true only for UNT email addresses
 function isUntEmail(email){
   return /^[^\s@]+@(my\.)?unt\.edu$/i.test(email);
 }
@@ -22,6 +30,8 @@ function show(id){
   closeDrawer();
   if(id==='home') renderGroups();
   if(id==='groups') renderJoined();
+  if(id==='profile') renderProfileGroups();
+  if(id==='notifications'){ renderNotifications(); markNotificationsRead(); }
 }
 function navigate(id){show(id)}
 function toggleDrawer(){document.getElementById('drawer').classList.toggle('open')}
@@ -56,7 +66,7 @@ function register(){
   if(!isUntEmail(email)){toast('Please use your UNT email (@my.unt.edu or @unt.edu).');return}
   if(p.length < 8){toast('Password must be at least 8 characters.');return}
   if(p!==c){toast('Passwords do not match.');return}
-  document.getElementById('profileName').textContent=name;
+  document.getElementById('profileName').value=name;
   document.getElementById('profileEmail').textContent=email;
   currentUserEmail = email;
   currentPasswordValue = p;
@@ -112,21 +122,72 @@ function renderJoined(){
 function joinGroup(id){
   const g=groups.find(x=>x.id===id); if(!g)return;
   g.joined=true;g.members++;
+  addNotification('Joined group','You joined '+g.name+'.');
   renderGroups();toast('Joined '+g.name+'.');
 }
 function leaveGroup(id){
   const g=groups.find(x=>x.id===id); if(!g)return;
   g.joined=false;g.members=Math.max(0,g.members-1);
+  addNotification('Left group','You left '+g.name+'.');
   renderGroups();renderJoined();toast('Left '+g.name+'.');
 }
 function saveProfile(){
-  const name=prompt('Enter your display name:',document.getElementById('profileName').textContent);
-  if(name!==null && name.trim()){
-    document.getElementById('profileName').textContent=name.trim();
-    toast('Profile saved.');
-  }
+  const name=document.getElementById('profileName').value.trim();
+  if(!name){toast('Please enter a display name.');return}
+  // Name, about, hobbies/classes and photo stay in this page until the backend is connected.
+  toast('Profile saved.');
+}
+function previewPhoto(){
+  const file=document.getElementById('photoInput').files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')){toast('Please choose an image file.');return}
+  if(file.size > 500*1024){toast('Picture must be under 500 KB.');return}
+  const reader=new FileReader();
+  reader.onload=function(){
+    profilePhoto=reader.result;
+    const avatar=document.getElementById('avatar');
+    avatar.style.backgroundImage='url('+profilePhoto+')';
+    avatar.textContent='';
+  };
+  reader.readAsDataURL(file);
+}
+function renderProfileGroups(){
+  const box=document.getElementById('profileGroups');
+  const joined=groups.filter(g=>g.joined);
+  box.innerHTML=joined.length ? joined.map(g=>'<div>• '+g.name+'</div>').join('') : '<div class="helper">No groups joined yet.</div>';
+}
+function sendReset(){
+  const email=document.getElementById('forgotEmail').value.trim();
+  if(!email){toast('Please enter your email.');return}
+  if(!isUntEmail(email)){toast('Please use your UNT email (@my.unt.edu or @unt.edu).');return}
+  toast('If that account exists, a reset link was sent (demo).');
+  show('login');
+}
+function addNotification(title,msg){
+  notifications.unshift({title:title,msg:msg,time:'Just now',unread:true});
+  updateBadge();
+}
+function renderNotifications(){
+  const list=document.getElementById('notificationList');
+  list.innerHTML=notifications.length ? notifications.map(n=>`
+    <div class="notification ${n.unread?'unread':''}">
+      <div class="bell">♧</div>
+      <div><p><b>${n.title}</b><br>${n.msg}</p><time>${n.time}</time></div>
+    </div>
+  `).join('') : '<div class="empty">No notifications yet.</div>';
+}
+function markNotificationsRead(){
+  notifications.forEach(n=>n.unread=false);
+  updateBadge();
+}
+function updateBadge(){
+  const count=notifications.filter(n=>n.unread).length;
+  const badge=document.getElementById('notifBadge');
+  badge.textContent=count;
+  badge.classList.toggle('hidden',count===0);
 }
 renderGroups();
+updateBadge();
 
 
 function updatePassword(){
