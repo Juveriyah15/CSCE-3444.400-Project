@@ -1,9 +1,12 @@
 // BACKEND FOR LOGIN , VERIFICATION , CREATING GROUPS , LEAVING GROUPS , ADMIN ROLE
 
 const express = require('express');
+const cors = require('cors');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
+
 const app = express();
+app.use(cors());
 app.use(express.json());
 const users = [];
 const groups = [];
@@ -562,6 +565,16 @@ app.post('/groups/:id/announcements', (req, res) => {
 
   nextAnnouncementId++;
   announcements.push(announcement);
+foundGroup.members.forEach(memberEmail => {
+    notifications.push({
+        id: nextNotificationId++,
+        email: memberEmail,
+        title: 'Announcement in ${foundGroup.name}',
+        message: message.trim(),
+        read: false,
+        createdAt: new Data()
+    });
+});
 
   res.status(201).json({
   message: 'Announcement successful',
