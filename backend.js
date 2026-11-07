@@ -569,7 +569,7 @@ foundGroup.members.forEach(memberEmail => {
     notifications.push({
         id: nextNotificationId++,
         email: memberEmail,
-        title: 'Announcement in ${foundGroup.name}',
+        title: `Announcement in ${foundGroup.name}`,
         message: message.trim(),
         read: false,
         createdAt: new Data()
