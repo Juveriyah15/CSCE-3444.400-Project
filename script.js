@@ -4,6 +4,8 @@ let currentUserEmail = '';
 let accountVerified = false;
 let profilePhoto = '';
 
+const groupsLeftList = [];
+
 // Notifications start with a few samples; joining/leaving groups adds new ones.
 const notifications = [
   {title:'Group Announcement', msg:'CSCE 3444 Study Group has a new announcement.', time:'2m ago', unread:true},
@@ -26,10 +28,12 @@ function isUntEmail(email){
 
 function show(id){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const target = document.getElementById(id);
+  if(target) target.classList.add('active');
   closeDrawer();
   if(id==='home') renderGroups();
   if(id==='groups') renderJoined();
+  if(id === 'groupsLeft') renderLeftGroups();
   if(id==='profile') renderProfileGroups();
   if(id==='notifications'){ renderNotifications(); markNotificationsRead(); }
 }
@@ -103,21 +107,38 @@ function renderGroups(){
     </div>
   `).join('') || '<div class="empty">No groups found.</div>';
 }
-function renderJoined(){
-  const list=document.getElementById('joinedList');
-  const joined=groups.filter(g=>g.joined);
-  list.innerHTML=joined.length ? joined.map(g=>`
-    <div class="group-card">
-      <div class="group-row">
-        <div class="group-icon">👥</div>
-        <div>
-          <div class="group-name">${g.name}</div>
-          <div class="group-meta">${g.members} members</div>
+async function renderJoined() {
+  const list = document.getElementById('joinedList');
+  if (!currentUserEmail) {
+    list.innerHTML = '<div class="empty">Please log in to view joined groups.</div>';
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:3005/users/${encodeURIComponent(currentUserEmail)}/groups`);
+    if (!res.ok) {
+      list.innerHTML = '<div class="empty">No joined groups found.</div>';
+      return;
+    }
+    const joined = await res.json();
+    list.innerHTML = joined.length ? joined.map(g => `
+      <div class="group-card">
+        <div class="group-row">
+          <div class="group-icon">👥</div>
+          <div>
+            <div class="group-name">${g.name}</div>
+            <!-- Fixed: g.members.length instead of g.members -->
+            <div class="group-meta">${g.members.length} members • ${g.courseCode ? 'Course: ' + g.courseCode : 'Hobby: ' + g.hobby}</div>
+          </div>
+        </div>
+        <div class="group-actions">
+          <button class="leave-btn" onclick="leaveGroup(${g.id})">LEAVE</button>
         </div>
       </div>
-      <div class="group-actions"><button class="leave-btn" onclick="leaveGroup(${g.id})">LEAVE</button></div>
-    </div>
-  `).join('') : '<div class="empty">You have not joined any groups yet.</div>';
+    `).join('') : '<div class="empty">You have not joined any groups yet.</div>';
+  } catch (err) {
+    list.innerHTML = '<div class="empty">Backend server not reachable.</div>';
+  }
 }
 function joinGroup(id){
   const g=groups.find(x=>x.id===id); if(!g)return;
